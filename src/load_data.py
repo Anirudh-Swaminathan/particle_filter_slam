@@ -157,10 +157,10 @@ def getRGBCalib():
 
 
 if __name__ == "__main__":
-    j0 = get_joint("joint/train_joint0")
-    l0 = get_lidar("lidar/train_lidar0")
-    r0 = get_rgb("cam/RGB_0")
-    d0 = get_depth("cam/DEPTH_0")
+    j0 = get_joint("data/joint/train_joint0")
+    l0 = get_lidar("data/lidar/train_lidar0")
+    r0 = get_rgb("data/cam/RGB_0")
+    d0 = get_depth("data/cam/DEPTH_0")
     exIR_RGB = getExtrinsics_IR_RGB()
     IRCalib = getIRCalib()
     RGBCalib = getRGBCalib()

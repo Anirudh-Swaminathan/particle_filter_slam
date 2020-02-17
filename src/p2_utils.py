@@ -80,7 +80,7 @@ def bresenham2D(sx, sy, ex, ey):
 
 ### TEST FUNCTIONS ###
 def test_mapCorrelation():
-  dataIn = io.loadmat("lidar/train_lidar0.mat")
+  dataIn = io.loadmat("data/lidar/train_lidar0.mat")
   angles = np.array([np.arange(-135,135.25,0.25)*np.pi/180.]).T
   ranges = np.double(dataIn['lidar'][0][110]['scan'][0][0]).T
 
