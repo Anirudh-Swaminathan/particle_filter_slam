@@ -48,4 +48,6 @@ class OccGridMap(object):
         Save the map for every state so far
         :return:
         """
+        # append the final grid, which may/may not have been appended
+        self.history.append(self.grid)
         np.save(self.save_path, np.array(self.history))
