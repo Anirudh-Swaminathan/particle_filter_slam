@@ -30,8 +30,11 @@ def main():
 
     for t in range(len(lidar_list)):
         dels = lidar_list[t]['delta_pose']
-        del_xb, del_yb, del_t = dels[0]
-        del_xw, del_yw = body_to_world(del_xb, del_yb, cur_pose[2])
+        # del_xb, del_yb, del_t = dels[0]
+        # del_xw, del_yw = body_to_world(del_xb, del_yb, cur_pose[2])
+
+        # The given file is already in world frame
+        del_xw, del_yw, del_t = dels[0]
         cur_pose[0] += del_xw
         cur_pose[1] += del_yw
         cur_pose[2] += del_t
@@ -40,8 +43,8 @@ def main():
             print("\nCurrent time:", t)
             print("Read data")
             print(dels, type(dels), len(dels))
-            print("Body frame")
-            print(del_xb, del_yb, del_t)
+            # print("Body frame")
+            # print(del_xb, del_yb, del_t)
             print("World Frame")
             print(del_xw, del_yw)
             print("Current robot position")
@@ -53,7 +56,7 @@ def main():
 
     # save the calculated poses to file
     world_poses = np.array(poses)
-    save_pth = "./outputs/dead_reckoning/world_poses"
+    save_pth = "./outputs/dead_reckoning/world_poses_final"
     np.save(save_pth + ".npy", world_poses)
     with open(save_pth + ".txt", "w") as f:
         f.writelines("%s\n" % pose for pose in poses)

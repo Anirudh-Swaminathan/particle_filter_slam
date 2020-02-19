@@ -15,13 +15,13 @@ class OccGridMap(object):
         self.cell_size = 0.05
 
         # the total side length the grid should span in meters
-        self.grid_dims = 20
+        self.grid_dims = 40
 
         # grid size is now calculated
         self.grid_size = int(self.grid_dims / self.cell_size)
 
         # set map(world frame) origin
-        self.origin = (200, 200)
+        self.origin = (int(self.grid_size / 2), int(self.grid_size / 2))
 
         # initialize the grid map to 0's
         self.grid = np.zeros((self.grid_size, self.grid_size))

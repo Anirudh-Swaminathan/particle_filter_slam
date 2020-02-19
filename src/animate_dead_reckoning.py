@@ -6,7 +6,7 @@ import matplotlib.animation as anim
 from matplotlib import style
 
 # import the data
-poses = np.load("./outputs/dead_reckoning/world_poses.npy")
+poses = np.load("./outputs/dead_reckoning/world_poses_final.npy")
 poses = poses.tolist()
 
 #style.use("seaborn-pastel")
