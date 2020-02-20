@@ -38,7 +38,7 @@ def get_lidar(file_name):
 
 def replay_lidar(lidar_data):
 	# lidar_data type: array where each array is a dictionary with a form of 't','pose','res','rpy','scan'
-	theta = np.arange(0,270.25,0.25)*np.pi/float(180)
+	theta = np.arange(-135,135.25,0.25)*np.pi/float(180)
 
 	for i in range(0,len(lidar_data),1000):
 		for (k,v) in enumerate(lidar_data[i]['scan'][0]):
