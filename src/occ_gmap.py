@@ -37,7 +37,8 @@ class OccGridMap(object):
         self.history = []
 
         # path to save the occupancy grid map to
-        self.save_path = "./outputs/dead_reckoning/occ_map.npy"
+        self.save_path = "outputs/first_map/occ_map.npy"
+        self.save_img_path = "outputs/first_map/occ_map.png"
 
         # vectorized functions to handle numpy inputs instead of scalar inputs
         self._v_bres = np.vectorize(self._bres)
@@ -89,12 +90,12 @@ class OccGridMap(object):
         :param ey: end y
         :return:
         """
-        print(type(sx), type(sy), type(ex), type(ey))
+        # print(type(sx), type(sy), type(ex), type(ey))
         ray_coords = pu.bresenham2D(sx, sy, ex, ey).astype(np.int64)
         occ_coords = ray_coords[:, -1]
         free_coords = ray_coords[:, :-1]
-        print(occ_coords.dtype, free_coords.dtype)
-        print(occ_coords)
+        # print(occ_coords.dtype, free_coords.dtype)
+        # print(occ_coords)
 
         # update occupied log odds cells
         self._update_occupied_logs(occ_coords[0], occ_coords[1])
@@ -122,18 +123,19 @@ class OccGridMap(object):
         # convert all the coordinates into grid coordinates
         exs, eys, _ = self._v_world_to_grid(lxs, lys, lts)
         n = l_scans.shape[1]
-        print(l_scans.shape)
+        # print(l_scans.shape)
         chk_arr_x = []
         chk_arr_y = []
-        for i in range(n):
-            x, y = l_scans[:, i]
-            ex, ey, _ = self.world_to_grid(x, y, 0)
-            chk_arr_x.append(ex)
-            chk_arr_y.append(ey)
-        chk_arr_x = np.array(chk_arr_x)
-        chk_arr_y = np.array(chk_arr_y)
-        assert(abs(np.sum(exs - chk_arr_x)) <= 1e-5)
-        assert(abs(np.sum(eys - chk_arr_y)) <= 1e-5)
+
+        # for i in range(n):
+        #     x, y = l_scans[:, i]
+        #     ex, ey, _ = self.world_to_grid(x, y, 0)
+        #     chk_arr_x.append(ex)
+        #     chk_arr_y.append(ey)
+        # chk_arr_x = np.array(chk_arr_x)
+        # chk_arr_y = np.array(chk_arr_y)
+        # assert(abs(np.sum(exs - chk_arr_x)) <= 1e-5)
+        # assert(abs(np.sum(eys - chk_arr_y)) <= 1e-5)
 
         # call vectorized bresenham function to update the corresponding cell log odds
         self._v_bres(sx, sy, exs, eys)
@@ -153,7 +155,8 @@ class OccGridMap(object):
         :return:
         """
         fig = plt.figure()
-        print(self.grid, self.grid.min(), self.grid.max(), self.grid.dtype, self.grid.shape)
+        # print(self.grid, self.grid.min(), self.grid.max(), self.grid.dtype, self.grid.shape)
         plotter = -1 * self.grid + 127.5
         plt.imshow(plotter, cmap="gray")
+        plt.savefig(self.save_img_path)
         plt.show()
