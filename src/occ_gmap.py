@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import numpy as np
+import p2_utils as pu
 
 
 class OccGridMap(object):
@@ -38,10 +39,43 @@ class OccGridMap(object):
         Convert world fame pose to grid frame pose
         :return:
         """
-        xg = x / self.cell_size + self.origin[0]
-        yg = y / self.cell_size + self.origin[1]
+        xg = int(round(x / self.cell_size)) + self.origin[0]
+        yg = int(round(y / self.cell_size)) + self.origin[1]
         tg = theta
         return xg, yg, tg
+
+    def bres(self, sx, sy, ex, ey):
+        """
+        Function to implement bresenham update
+        :param sx: start x
+        :param sy: start y
+        :param ex: end x
+        :param ey: end y
+        :return:
+        """
+        ray_coords = pu.bresenham2D(sx, sy, ex, ey)
+        occ_coords = ray_coords[:, -1]
+        free_coords = ray_coords[:, :-1]
+
+    def update_map(self, l_scans, r_pose):
+        """
+        Updates the Occupancy Grid Map with the Laser Scan values
+        :param l_scans: Laser Scan Points
+        :param r_pose: Robot pose at current time
+        :return:
+        """
+        # save the old map
+        self.history.append(self.grid)
+        sx, sy, _ = self.world_to_grid(r_pose[0], r_pose[1], r_pose[2])
+        n_scans = l_scans.shape[1]
+        for s in range(n_scans):
+            x, y = l_scans[:, s]
+            ex, ey, _ = self.world_to_grid(x, y, 0)
+            ray_coords = pu.bresenham2D(sx, sy, ex, ey)
+            print(ray_coords.shape)
+            occ_coords = ray_coords[:, -1]
+            free_coords = ray_coords[:, :-1]
+            print(occ_coords.shape, free_coords.shape)
 
     def save_history(self):
         """
@@ -51,3 +85,10 @@ class OccGridMap(object):
         # append the final grid, which may/may not have been appended
         self.history.append(self.grid)
         np.save(self.save_path, np.array(self.history))
+
+    def render_map(self):
+        """
+        Function to render the map
+        :return:
+        """
+        pass

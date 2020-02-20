@@ -116,7 +116,14 @@ def main():
         print(scan_world_coords.shape)
         print("Removed scan points hitting on/close to the floor, and moved to the 2D frame in meters!")
 
-        # transform world frame meters to grid frame
+        # update the map using the given scans
+        grid_map.update_map(scan_world_coords, body_pose)
+
+    # draw the map
+    grid_map.render_map()
+
+    # save the map to file to draw later on
+    grid_map.save_history()
 
 
 if __name__ == '__main__':
