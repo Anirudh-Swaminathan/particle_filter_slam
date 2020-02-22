@@ -33,6 +33,13 @@ class LiDAR(object):
         self.hPl = np.array([[0.0], [0.0], [0.15]])
         self.bPh = np.array([[0.0], [0.0], [0.33]])
 
+    def __len__(self):
+        """
+        length of LiDAR data
+        :return:
+        """
+        return len(self.lidar_list)
+
     def get_timestamp(self, t):
         """
         Returns the lidar timestamp at time t

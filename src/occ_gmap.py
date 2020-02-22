@@ -37,10 +37,6 @@ class OccGridMap(object):
         # append map to history before each update to map
         self.history = []
 
-        # path to save the occupancy grid map to
-        self.save_path = "outputs/first_map/occ_map.npy"
-        self.save_img_path = "outputs/first_map/occ_map.png"
-
         # vectorized functions to handle numpy inputs instead of scalar inputs
         self._v_bres = np.vectorize(self._bres)
         self._v_update_free_logs = np.vectorize(self._update_free_logs)
@@ -141,16 +137,16 @@ class OccGridMap(object):
         # call vectorized bresenham function to update the corresponding cell log odds
         self._v_bres(sx, sy, exs, eys)
 
-    def save_history(self):
+    def save_history(self, pth):
         """
         Save the map for every state so far
         :return:
         """
         # append the final grid, which may/may not have been appended
         self.history.append(self.grid)
-        np.save(self.save_path, np.array(self.history))
+        np.save(pth, np.array(self.history))
 
-    def render_map(self):
+    def render_map(self, pth):
         """
         Function to render the map
         :return:
@@ -161,5 +157,5 @@ class OccGridMap(object):
         # convert the log odds to probabilities using logistic function
         plotter = 1 - expit(self.grid)
         plt.imshow(plotter, cmap="gray")
-        plt.savefig(self.save_img_path)
+        plt.savefig(pth)
         plt.show()
