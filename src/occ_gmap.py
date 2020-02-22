@@ -18,7 +18,7 @@ class OccGridMap(object):
         self.cell_size = 0.05
 
         # the total side length the grid should span in meters
-        self.grid_dims = 40
+        self.grid_dims = 80
 
         # grid size is now calculated
         self.grid_size = int(self.grid_dims / self.cell_size)
@@ -32,10 +32,6 @@ class OccGridMap(object):
         # occupancy delta log odds
         # For now, it is 80%/20% = 4 => log(4)
         self.delta_log = np.log(4)
-
-        # maintain a history of grid maps
-        # append map to history before each update to map
-        self.history = []
 
         # vectorized functions to handle numpy inputs instead of scalar inputs
         self._v_bres = np.vectorize(self._bres)
@@ -108,8 +104,6 @@ class OccGridMap(object):
         :param r_pose: Robot pose at current time
         :return:
         """
-        # save the old map
-        self.history.append(self.grid)
         sx, sy, _ = self.world_to_grid(r_pose[0], r_pose[1], r_pose[2])
 
         # extract all the x and y coordinates of scan end-points
@@ -119,10 +113,10 @@ class OccGridMap(object):
 
         # convert all the coordinates into grid coordinates
         exs, eys, _ = self._v_world_to_grid(lxs, lys, lts)
-        n = l_scans.shape[1]
+        # n = l_scans.shape[1]
         # print(l_scans.shape)
-        chk_arr_x = []
-        chk_arr_y = []
+        # chk_arr_x = []
+        # chk_arr_y = []
 
         # for i in range(n):
         #     x, y = l_scans[:, i]
@@ -136,15 +130,6 @@ class OccGridMap(object):
 
         # call vectorized bresenham function to update the corresponding cell log odds
         self._v_bres(sx, sy, exs, eys)
-
-    def save_history(self, pth):
-        """
-        Save the map for every state so far
-        :return:
-        """
-        # append the final grid, which may/may not have been appended
-        self.history.append(self.grid)
-        np.save(pth, np.array(self.history))
 
     def render_map(self, pth):
         """

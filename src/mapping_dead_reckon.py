@@ -3,6 +3,35 @@ import numpy as np
 import load_data as ld
 from occ_gmap import OccGridMap as OGM
 from lidar import LiDAR
+from scipy.special import expit
+from matplotlib import pyplot as plt
+
+
+fig = plt.figure()
+
+
+def plot_map(poses, mp, t, pth):
+    data = poses
+    x_p = list(list(zip(*data))[0])
+    y_p = list(list(zip(*data))[1])
+    x_p = np.array(x_p)
+    y_p = np.array(y_p)
+    x_g, y_g, _ = mp._v_world_to_grid(x_p, y_p, np.zeros(x_p.shape[0]))
+    x_g = x_g.tolist()
+    y_g = y_g.tolist()
+    # im.set_array(occ_maps[1])
+    # path.set_data(x_p, y_p)
+
+    # convert occupancy log odds to probabilities
+    p = 1 - expit(mp.grid)
+    I = np.dstack([p, p, p])
+    # set path cells as RED
+    I[x_g, y_g, :] = [1.0, 0.0, 0.0]
+    plt.imshow(I, extent=[0, mp.grid_size, 0, mp.grid_size])
+    plt.title("Occupancy Grid at time: " + str(t))
+    # ax.plot(x_g, y_g, 'r')
+    plt.savefig(pth + str(t) + ".png")
+    plt.show(block=False)
 
 
 def main():
@@ -16,7 +45,11 @@ def main():
     # initialize the occupancy grid map
     grid_map = OGM()
 
+    # map save path
+    save_img = "./outputs/mapping_dead_reckon/occ_maps_dataset0_"
+
     for t in range(len(li)):
+        print("Time:", t + 1)
         l_ts = li.get_timestamp(t)
         scans = li.get_scans(t)
 
@@ -47,15 +80,11 @@ def main():
         # update the map using the given scans
         grid_map.update_map(scan_world_coords, body_pose)
 
-    # map save path
-    save_map = "./outputs/mapping_dead_reckon/occ_maps_dataset0.npy"
-    save_img = "./outputs/mapping_dead_reckon/occ_maps_dataset0.png"
+        if t % 500 == 0:
+            plot_map(world_poses[:(t+1)], grid_map, t, save_img)
 
     # draw the map
-    grid_map.render_map(save_img)
-
-    # save the map to file to draw later on
-    grid_map.save_history(save_map)
+    grid_map.render_map(save_img + str(len(li)) + ".png")
 
 
 if __name__ == '__main__':
