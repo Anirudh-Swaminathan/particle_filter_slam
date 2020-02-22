@@ -144,3 +144,11 @@ class OccGridMap(object):
         plt.imshow(plotter, cmap="gray")
         plt.savefig(pth)
         plt.show()
+
+    def save_grid(self, pth):
+        """
+        save the occupancy grid as numpy array(to be loaded when necessary)
+        :param pth: path to save the current grid to
+        :return:
+        """
+        np.save(pth, self.grid)
