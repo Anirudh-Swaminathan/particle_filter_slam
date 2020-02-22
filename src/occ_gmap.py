@@ -2,6 +2,7 @@
 import numpy as np
 import p2_utils as pu
 import matplotlib.pyplot as plt
+from scipy.special import expit
 
 
 class OccGridMap(object):
@@ -66,8 +67,8 @@ class OccGridMap(object):
         """
         # to avoid very high occupied logs as we progress through the time steps
         # also easy to convert to grayscale -> 255/2 = 127.5
-        if self.grid[x, y] < 127.5:
-            self.grid[x, y] += self.delta_log
+        # if self.grid[x, y] < 127.5:
+        self.grid[x, y] += self.delta_log
 
     def _update_free_logs(self, x, y):
         """
@@ -78,8 +79,8 @@ class OccGridMap(object):
         """
         # to avoid very low occupied logs as we progress through the time steps
         # also easy to convert to grayscale -> 255/2 = 127.5
-        if self.grid[x, y] > -127.5:
-            self.grid[x, y] -= self.delta_log
+        # if self.grid[x, y] > -127.5:
+        self.grid[x, y] -= self.delta_log
 
     def _bres(self, sx, sy, ex, ey):
         """
@@ -156,7 +157,9 @@ class OccGridMap(object):
         """
         fig = plt.figure()
         # print(self.grid, self.grid.min(), self.grid.max(), self.grid.dtype, self.grid.shape)
-        plotter = -1 * self.grid + 127.5
+        # plotter = -1 * self.grid + 127.5
+        # convert the log odds to probabilities using logistic function
+        plotter = 1 - expit(self.grid)
         plt.imshow(plotter, cmap="gray")
         plt.savefig(self.save_img_path)
         plt.show()

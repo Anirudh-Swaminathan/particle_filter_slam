@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 from matplotlib import style
 from occ_gmap import OccGridMap as OGM
+from scipy.special import expit
 
 # import the data
 poses = np.load("./outputs/dead_reckoning/world_poses_final.npy")
@@ -42,11 +43,12 @@ def animate(i):
     # im.set_array(occ_maps[1])
     # path.set_data(x_p, y_p)
     ax.clear()
-    im = occ_maps[1]
-    p = -1 * im + 127.5
-    I = np.dstack([p, p, p]).astype(np.int)
+
+    # convert occupancy log odds to probabilities
+    p = 1 - expit(occ_maps[1])
+    I = np.dstack([p, p, p])
     # set path cells as RED
-    I[x_g, y_g, :] = [255, 0, 0]
+    I[x_g, y_g, :] = [1.0, 0.0, 0.0]
     ax.imshow(I, extent=[0, 800, 0, 800])
     # ax.plot(x_g, y_g, 'r')
     return [ax, ]
@@ -58,5 +60,5 @@ def animate(i):
 
 # save plot to file
 ani = anim.FuncAnimation(fig, animate, init_func=init, frames=122, interval=100, blit=False, repeat=False)
-ani.save('./outputs/dead_reckoning/dead_reckon_map_001.mp4', extra_args=['-vcodec', 'libx264'])
+ani.save('./outputs/dead_reckoning/dead_reckon_dataset0_newmap.mp4', extra_args=['-vcodec', 'libx264'])
 # ani.save("./outputs/dead_reckoning/path.mp4", writer=writer)
