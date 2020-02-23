@@ -13,7 +13,8 @@ from particles import Particles
 fig = plt.figure()
 
 
-def plot_map(parts, mp, t, pth):
+def plot_map(ps, mp, t, pth):
+    print("In plot_map()")
     # convert occupancy log odds to probabilities
     p = 1 - expit(mp.grid)
     I = np.dstack([p, p, p])
@@ -21,14 +22,36 @@ def plot_map(parts, mp, t, pth):
     plt.title("Occupancy Grid at time: " + str(t))
 
     # convert particle coordinates to grid coordinates
+    parts = ps.poses
+    print(parts.shape)
     x_p = parts[:, 0]
     y_p = parts[:, 1]
-    x_g, y_g, _ = mp._v_world_to_grid(x_p, y_p, 0)
+    # x_g, y_g, _ = mp._v_world_to_grid(x_p, y_p, 0)
+    x_g = mp.origin[0] + np.round(x_p / mp.cell_size).astype(np.int)
+    y_g = mp.origin[1] + np.round(y_p / mp.cell_size).astype(np.int)
     x_g = x_g.tolist()
     y_g = y_g.tolist()
+    print(len(x_g), len(y_g))
+
+    # # plot the best particle's trajectory
+    # btraj = ps.get_best_path()
+    # print(len(btraj))
+    # bt = np.array(btraj)
+    # x_t = bt[:, 0]
+    # y_t = bt[:, 1]
+    # z_t = bt[:, 2]
+    # # x_gt, y_gt, _ = mp._v_world_to_grid(x_t, y_t, z_t)
+    # x_gt = mp.origin[0] + np.round(x_t / mp.cell_size).astype(np.int)
+    # y_gt = mp.origin[1] + np.round(y_t / mp.cell_size).astype(np.int)
+    # x_gt = x_gt.tolist()
+    # y_gt = y_gt.tolist()
+    # print(len(x_gt), len(y_gt))
+
+    # plot the path
+    # plt.plot(x_gt, y_gt, color='b')
 
     # scatter current particles on grid
-    plt.scatter(x_g, y_g, s=3, color='r')
+    plt.scatter(x_g, y_g, s=1, color='r')
     plt.savefig(pth + str(t) + ".png")
     print("Saved map as png to file after time:", t)
     plt.show(block=False)
@@ -45,10 +68,12 @@ def main():
     save_pth = "./outputs/map_dead_reckon_particle/occ_maps_dataset0_"
 
     # initialize 1 particles with dead reckoning first
-    particles = Particles(n=1)
+    particles = Particles(n=4)
 
     for t in range(len(li)):
         print("Time:", t + 1)
+
+        ### MAPPING!!
         l_ts = li.get_timestamp(t)
         scans = li.get_scans(t)
 
@@ -79,8 +104,13 @@ def main():
         # update the map using the given scans
         grid_map.update_map(scan_world_coords, body_pose)
 
+        ### PREDICTION!
+        delta_p = li.get_delta_pose(t)
+        delta_p = delta_p.reshape((1, 3))
+        particles.dead_reckon_move(delta_p)
+
         if t % 500 == 0:
-            plot_map(particles.poses, grid_map, t, save_pth)
+            plot_map(particles, grid_map, t, save_pth)
 
         if t % 2500 == 0:
             grid_map.save_grid(save_pth + str(t) + ".npy")
@@ -90,6 +120,7 @@ def main():
                 save_pth + "weights_" + str(t) + ".npy"
             )
             print("Saved the particle positions and weights at time", t, "to file")
+            particles.save_best_path(save_pth + "path_" + str(t) + ".npy")
 
     # draw the map
     grid_map.render_map(save_pth + str(len(li)) + ".png")
