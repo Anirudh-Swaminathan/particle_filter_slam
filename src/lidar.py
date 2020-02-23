@@ -132,3 +132,12 @@ class LiDAR(object):
         rot_body_poses = np.matmul(wRb, body_coords)
         scan_world_frame = rot_body_poses + wPb
         return scan_world_frame
+
+    def get_delta_pose(self, t):
+        """
+        Get's the delta_pose of odometry at index t
+        :param t: index t of lidar scan
+        :return: delta_pose -> the odometry world frame delta_pose
+        """
+        dels = self.lidar_list[t]["delta_pose"]
+        return dels[0]
