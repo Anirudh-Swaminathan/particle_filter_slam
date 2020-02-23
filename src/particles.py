@@ -18,7 +18,7 @@ class Particles(object):
         self._init_particles()
 
         # standard deviations for x, y and yaw
-        self.predict_noise = np.array([0.05, 0.05, 0.01])
+        self.predict_noise = np.array([0.005, 0.005, 0.0001])
 
         # store best particles trajectory(list of numpy arrays)
         self.best_traj = []
@@ -43,7 +43,7 @@ class Particles(object):
         print("\nIn dead_reckon_move()")
         # obtain the previous best particle and record its trajectory
         best_part = self.get_best_particle()
-        self.best_traj.append(best_part)
+        self.best_traj.append(best_part[:])
 
         self.poses += delta_pose.reshape((1, 3))
         print(delta_pose, self.poses, self.poses.shape, best_part, len(self.best_traj))
@@ -56,7 +56,7 @@ class Particles(object):
         """
         # obtain the previous best particle and record its trajectory
         best_part = self.get_best_particle()
-        self.best_traj.append(best_part)
+        self.best_traj.append(np.copy(best_part))
 
         # generate noise (num_particles, 1)
         dx = np.random.normal(0.0, self.predict_noise[0], (self.num_particles, 1))
