@@ -58,6 +58,16 @@ class Particles(object):
         add_pose = dp + delta_pose.reshape((1, 3))
         self.poses += add_pose
 
+    def get_best_particle(self):
+        """
+        Return the best particle at this time step t
+        :return: best_particle - the best particle at given time step
+        """
+        # find the index of particle with largest weight(probability)
+        ind = np.argmax(self.weights)
+        best_particle = self.poses[ind, :]
+        return best_particle
+
     def save_particles(self, p_pth, w_pth):
         """
         Save the particles to the specified paths when invoked
