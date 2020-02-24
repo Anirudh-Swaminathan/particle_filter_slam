@@ -73,9 +73,9 @@ def main():
     grid_map = OGM()
 
     # map save path
-    save_pth = "./outputs/slam_25parts_noyaw/occ_maps_25parts_dataset0_"
+    save_pth = "./outputs/slam_25parts_noyaw/dataset0/test_002/occ_maps_"
 
-    # initialize 1 particles with dead reckoning first
+    # initialize with 25 particles
     particles = Particles(n=25)
 
     for t in range(len(li)):

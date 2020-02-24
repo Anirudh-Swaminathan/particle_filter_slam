@@ -21,7 +21,7 @@ class Particles(object):
         self._init_particles()
 
         # standard deviations for x, y and yaw
-        self.predict_noise = np.array([0.005, 0.005, 0.01])
+        self.predict_noise = np.array([0.025, 0.025, 0.025])
 
         # store best particles trajectory(list of numpy arrays)
         self.best_traj = []
@@ -96,8 +96,6 @@ class Particles(object):
 
         # binarize map
         bin_map = (expit(mp.grid) > 0.5).astype(np.int)
-
-        # setup local coordinates
         max_correlations = []
 
         # find the map correlation for each particle
