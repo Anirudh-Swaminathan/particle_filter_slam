@@ -65,12 +65,15 @@ class LiDAR(object):
         """
         # Remove scan points too close or too far
         indValid = np.logical_and((scans < 29.9), (scans > 0.1))
-        val_scans = scans[indValid]
-        val_thets = self.scan_theta[indValid]
+        val_scans = np.copy(scans[indValid])
+        val_thets = np.copy(self.scan_theta)
+        val_thets = val_thets[indValid]
 
         # LIDAR - Polar to Cartesian
-        xl = np.array([val_scans * np.cos(val_thets)])
-        yl = np.array([val_scans * np.sin(val_thets)])
+        #xl = np.array([val_scans * np.cos(val_thets)])
+        #yl = np.array([val_scans * np.sin(val_thets)])
+        xl = val_scans * np.cos(val_thets)
+        yl = val_scans * np.sin(val_thets)
         # It's on the XY plane, so z is 0 for all the points
         zl = np.zeros(xl.shape)
         return xl, yl, zl
@@ -84,6 +87,7 @@ class LiDAR(object):
         # identify the closest timestamp to LASER scan
         b_arr = (self.j_ts > ts).astype(np.int8)
         id = np.argmax(b_arr) - 1
+        # print("Index is", id)
         # print(id, l_ts, j_ts[id], j_ts[0], j_ts[id + 1])
         yaw = self.j_necks[id]
         pitch = self.j_heads[id]

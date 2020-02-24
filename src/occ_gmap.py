@@ -18,7 +18,7 @@ class OccGridMap(object):
         self.cell_size = 0.05
 
         # the total side length the grid should span in meters
-        self.grid_dims = 80
+        self.grid_dims = 40
 
         # grid size is now calculated
         self.grid_size = int(self.grid_dims / self.cell_size)
@@ -34,10 +34,10 @@ class OccGridMap(object):
         self.delta_log = np.log(4)
 
         # min and max required for map correlation (in meters)
-        self.xmin = -40
-        self.ymin = -40
-        self.xmax = 40
-        self.ymax = 40
+        self.xmin = -20
+        self.ymin = -20
+        self.xmax = 20
+        self.ymax = 20
 
         # vectorized functions to handle numpy inputs instead of scalar inputs
         self._v_bres = np.vectorize(self._bres)
@@ -118,7 +118,30 @@ class OccGridMap(object):
         lts = np.zeros(l_scans.shape)
 
         # convert all the coordinates into grid coordinates
-        exs, eys, _ = self._v_world_to_grid(lxs, lys, lts)
+        # exs, eys, _ = self._v_world_to_grid(lxs, lys, lts)
+        ans = self._v_world_to_grid(lxs, lys, lts)
+        exs = ans[0]
+        eys = ans[1]
+        ezs = ans[2]
+        # print("Printing values now!!")
+        # # print(l_scans.shape, lxs.shape, lys.shape)
+        # # print(len(ans))
+        # # print(exs.shape)
+        # # print(eys.shape)
+        # # print(ezs.shape)
+        # # print(exs[0][:11])
+        # # print(exs[0][500:510])
+        # # print(exs[0][:-10])
+        # print(eys[0][:11])
+        # print(eys[0][500:510])
+        # print(eys[0][:-10])
+        # print(eys[1][:11])
+        # print(eys[1][500:510])
+        # print(eys[1][:-10])
+        # print(ezs[0][:11])
+        # print(ezs[0][500:510])
+        # print(ezs[0][:-10])
+        # print("printed values!!")
         # n = l_scans.shape[1]
         # print(l_scans.shape)
         # chk_arr_x = []
@@ -135,7 +158,7 @@ class OccGridMap(object):
         # assert(abs(np.sum(eys - chk_arr_y)) <= 1e-5)
 
         # call vectorized bresenham function to update the corresponding cell log odds
-        self._v_bres(sx, sy, exs, eys)
+        self._v_bres(sx, sy, exs[0], eys[0])
 
     def render_map(self, pth):
         """
