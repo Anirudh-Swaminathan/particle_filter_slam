@@ -2,6 +2,9 @@
 
 # Created by anicodebreaker at 22/02/20
 import numpy as np
+from scipy.special import expit
+from scipy.special import softmax
+import p2_utils as pu
 
 
 class Particles(object):
@@ -18,10 +21,14 @@ class Particles(object):
         self._init_particles()
 
         # standard deviations for x, y and yaw
-        self.predict_noise = np.array([0.005, 0.005, 0.0001])
+        self.predict_noise = np.array([0.005, 0.005, 0.01])
 
         # store best particles trajectory(list of numpy arrays)
         self.best_traj = []
+
+        # set the threshold for resampling
+        # this is 15% of the initial number of particles
+        self.Nthresh = 0.15 * self.num_particles
 
     def __len__(self):
         return self.num_particles
@@ -70,6 +77,67 @@ class Particles(object):
         # add noise to delta_pose
         add_pose = dp + delta_pose.reshape((1, 3))
         self.poses += add_pose
+
+    def update(self, scan_body_frame, li, mp):
+        """
+        UPDATE step for Particle Filter using LASER Scan Matching
+        :param scan_body_frame: lidar scan in body frame
+        :param li: reference to LiDAR class object
+        :param mp: reference to OccupancyGridMap object
+        :return:
+        """
+        # setup map coordinates in world frame
+        x_im = np.arange(mp.xmin, mp.xmax + mp.cell_size, mp.cell_size)
+        y_im = np.arange(mp.xmin, mp.xmax + mp.cell_size, mp.cell_size)
+
+        # setup the neighborhood around current particle to calculate correlation for
+        x_range = np.arange(-0.2, 0.2 + 0.05, 0.05)
+        y_range = np.arange(-0.2, 0.2 + 0.05, 0.05)
+
+        # binarize map
+        bin_map = (expit(mp.grid) > 0.5).astype(np.int)
+
+        # setup local coordinates
+        max_correlations = []
+
+        # find the map correlation for each particle
+        for p in self.poses:
+            # convert scans to world frame for given particle
+            scan_world_frame = li.body_to_world(scan_body_frame, p)
+
+            # Remove points hitting/close to floor
+            fin_scan_inds = np.where(abs(scan_world_frame[2, :]) > 0.1)
+            scan_world_coords = scan_world_frame[:3, fin_scan_inds[0]]
+
+            # call mapCorrelation
+            c = pu.mapCorrelation(bin_map, x_im, y_im, scan_world_coords, x_range, y_range)
+            mc = c.max()
+            max_correlations.append(np.copy(mc))
+        max_cs = np.array(max_correlations)
+
+        # observation model from laser correlation
+        obs_model = softmax(max_cs - np.max(max_cs))
+
+        assert(obs_model.shape == self.weights.shape)
+        # particle filter update equation
+        numer = self.weights * obs_model
+        self.weights = numer / np.sum(numer)
+
+    def resample(self):
+        Neff = 1 / np.sum(self.weights ** 2)
+        if Neff > self.Nthresh:
+            return
+        print("RESAMPLING particles!")
+        print(Neff, self.Nthresh)
+        print(len(np.unique(self.weights)))
+
+        # Use Sample Importance Resampling
+        part_inds = np.random.choice(np.arange(self.num_particles), self.num_particles, p=self.weights)
+        new_parts = self.poses[part_inds]
+        self.poses = np.copy(new_parts)
+        self.weights = np.array([1/self.num_particles for p in range(self.num_particles)])
+        print(len(np.unique(self.weights)))
+        print("RESAMPLING DONE!!")
 
     def get_best_particle(self):
         """

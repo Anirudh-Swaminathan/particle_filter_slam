@@ -33,6 +33,12 @@ class OccGridMap(object):
         # For now, it is 80%/20% = 4 => log(4)
         self.delta_log = np.log(4)
 
+        # min and max required for map correlation (in meters)
+        self.xmin = -40
+        self.ymin = -40
+        self.xmax = 40
+        self.ymax = 40
+
         # vectorized functions to handle numpy inputs instead of scalar inputs
         self._v_bres = np.vectorize(self._bres)
         self._v_update_free_logs = np.vectorize(self._update_free_logs)
