@@ -78,10 +78,10 @@ def main():
     grid_map = OGM()
 
     # map save path
-    save_pth = "./outputs/map_predict/occ_maps_dataset0_"
+    save_pth = "./outputs/map_predict/dataset0/try_004/occ_maps_"
 
-    # initialize 1 particles with dead reckoning first
-    particles = Particles(n=4)
+    # initialize 25 particles
+    particles = Particles(n=25)
 
     for t in range(len(li)):
         print("Time:", t + 1)
@@ -111,7 +111,7 @@ def main():
         scan_world_frame = li.body_to_world(scan_body_frame, body_pose)
 
         # Remove points hitting/close to floor
-        fin_scan_inds = np.where(abs(scan_world_frame[2, :]) > 0.1)
+        fin_scan_inds = np.where(scan_world_frame[2, :] > 0.1)
         scan_world_coords = scan_world_frame[:2, fin_scan_inds[0]]
 
         # update the map using the given scans
@@ -139,6 +139,16 @@ def main():
     grid_map.render_map(save_pth + str(len(li)) + ".png")
     grid_map.save_grid(save_pth + str(len(li)) + ".npy")
     print("Saved the Occupancy Grid finally to png and numpy")
+
+    # draw final time step with particles
+    plot_map(particles, grid_map, len(li), save_pth)
+    particles.save_particles(
+        save_pth + "particles_" + str(len(li)) + ".npy",
+        save_pth + "weights_" + str(len(li)) + ".npy"
+    )
+    print("Saved the particle positions and weights at the end to file")
+    particles.save_best_path(save_pth + "path_" + str(len(li)) + ".npy")
+    print("Saved the final best-particle trajectory at the end!!")
 
 
 if __name__ == "__main__":

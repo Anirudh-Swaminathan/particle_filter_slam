@@ -73,7 +73,7 @@ def main():
     grid_map = OGM()
 
     # map save path
-    save_pth = "./outputs/slam_25parts_noyaw/dataset0/test_002/occ_maps_"
+    save_pth = "./outputs/slam/dataset0/test_003/occ_maps_"
 
     # initialize with 25 particles
     particles = Particles(n=25)
@@ -106,7 +106,7 @@ def main():
         scan_world_frame = li.body_to_world(scan_body_frame, body_pose)
 
         # Remove points hitting/close to floor
-        fin_scan_inds = np.where(abs(scan_world_frame[2, :]) > 0.1)
+        fin_scan_inds = np.where(scan_world_frame[2, :] > 0.1)
         scan_world_coords = scan_world_frame[:2, fin_scan_inds[0]]
 
         # update the map using the given scans
