@@ -8,7 +8,7 @@ from occ_gmap import OccGridMap as OGM
 from scipy.special import expit
 
 # import the data
-img_base_path = "./outputs/map_predict/occ_maps_dataset0_"
+img_base_path = "./outputs/map_dead_reckon/dataset0/try_002/occ_maps_"
 
 # style.use("seaborn-pastel")
 style.use('fivethirtyeight')
@@ -29,7 +29,7 @@ def center_crop(ima):
     """
     xs = ima.shape[0]
     ys = ima.shape[1]
-    ret = ima[int(xs/4):int(3*xs/4), int(ys/4):int(3*ys/4), :]
+    ret = ima[int(3*xs/16):int(13*xs/16), int(3*ys/16):int(13*ys/16), :]
     return ret
 
 
@@ -56,5 +56,5 @@ def animate(i):
 
 # save plot to file
 ani = anim.FuncAnimation(fig, animate, frames=26, interval=500, blit=False, repeat=False)
-ani.save('./outputs/map_predict/dataset0_25frames_4parts.mp4', extra_args=['-vcodec', 'libx264'])
+ani.save(img_base_path + "vid.mp4", extra_args=['-vcodec', 'libx264'])
 # ani.save("./outputs/dead_reckoning/path.mp4", writer=writer)
