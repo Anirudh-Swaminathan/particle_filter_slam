@@ -21,7 +21,7 @@ class Particles(object):
         self._init_particles()
 
         # standard deviations for x, y and yaw
-        self.predict_noise = np.array([0.005, 0.005, 0.0005])
+        self.predict_noise = np.array([0.005, 0.005, 0.0025])
 
         # store best particles trajectory(list of numpy arrays)
         self.best_traj = []
@@ -47,13 +47,13 @@ class Particles(object):
         :param delta_pose: odometry delta pose in world frame
         :return:
         """
-        print("\nIn dead_reckon_move()")
+        # print("\nIn dead_reckon_move()")
         # obtain the previous best particle and record its trajectory
         best_part = self.get_best_particle()
         self.best_traj.append(np.copy(best_part))
 
         self.poses += delta_pose.reshape((1, 3))
-        print(delta_pose, self.poses, self.poses.shape, best_part, len(self.best_traj))
+        # print(delta_pose, self.poses, self.poses.shape, best_part, len(self.best_traj))
 
     def predict(self, delta_pose):
         """
@@ -97,7 +97,7 @@ class Particles(object):
         # binarize map
         # bin_map = (expit(mp.grid) > 0.5).astype(np.int)
         bin_map = (mp.grid > mp.delta_log).astype(np.int)
-        print(bin_map.shape, bin_map.min(), bin_map.max(), np.sum(bin_map))
+        # print(bin_map.shape, bin_map.min(), bin_map.max(), np.sum(bin_map))
         max_correlations = []
 
         # find the map correlation for each particle
@@ -115,58 +115,59 @@ class Particles(object):
             mc = c.max()
             max_correlations.append(np.copy(mc))
         max_cs = np.array(max_correlations)
-        print("Current max correlations are :")
-        print(max_cs[:5], max_cs[-5:])
-        print(max_cs.shape, max_cs.min(), max_cs.max())
+        # print("Current max correlations are :")
+        # print(max_cs[:5], max_cs[-5:])
+        # print(max_cs.shape, max_cs.min(), max_cs.max())
 
         # observation model from laser correlation
         obs_model = softmax(max_cs - np.max(max_cs))
-        print(obs_model.shape)
+        # print(obs_model.shape)
         assert(np.sum(abs(obs_model - softmax(max_cs))) <= 1e-6)
-        print("Observation model is:")
-        print(obs_model[:5], obs_model[-5:])
-        print(obs_model.shape, obs_model.min(), obs_model.max())
+        # print("Observation model is:")
+        # print(obs_model[:5], obs_model[-5:])
+        # print(obs_model.shape, obs_model.min(), obs_model.max())
 
         assert(obs_model.shape == self.weights.shape)
         print("Old weights:")
         print(self.weights[:5], self.weights[-5:])
-        print(self.weights.shape, self.weights.min(), self.weights.max(), len(np.unique(self.weights)))
+        # print(self.weights.shape, self.weights.min(), self.weights.max(), len(np.unique(self.weights)))
         # particle filter update equation
-        numer = self.weights * obs_model
+        # numer = self.weights * obs_model
+        numer = np.multiply(self.weights, obs_model)
         self.weights = numer / np.sum(numer)
         print("New Weights!:")
         print(self.weights[:5], self.weights[-5:])
-        print(self.weights.shape, self.weights.min(), self.weights.max(), len(np.unique(self.weights)))
+        # print(self.weights.shape, self.weights.min(), self.weights.max(), len(np.unique(self.weights)))
 
     def resample(self):
-        Neff = 1 / np.sum(self.weights ** 2)
+        Neff = 1.0 / np.sum(self.weights ** 2)
         print("Neff is :", Neff)
         if Neff > self.Nthresh:
             return
         print("RESAMPLING particles!")
-        print(len(np.unique(self.weights)))
+        # print(len(np.unique(self.weights)))
 
         print("Old weights:")
         print(self.weights[:5], self.weights[-5:])
-        print(self.weights.shape, self.weights.min(), self.weights.max(), len(np.unique(self.weights)))
+        # print(self.weights.shape, self.weights.min(), self.weights.max(), len(np.unique(self.weights)))
 
         print("Old poses:")
         print(self.poses[:5], self.poses[-5:])
-        print(self.poses.shape, self.poses.min(), self.poses.max(), len(np.unique(self.poses)))
+        # print(self.poses.shape, self.poses.min(), self.poses.max(), len(np.unique(self.poses)))
 
         # Use Sample Importance Resampling
         part_inds = np.random.choice(np.arange(self.num_particles), self.num_particles, p=self.weights)
         new_parts = self.poses[part_inds]
         self.poses = np.copy(new_parts)
         self.weights = np.array([1/self.num_particles for p in range(self.num_particles)])
-        print(len(np.unique(self.weights)))
+        # print(len(np.unique(self.weights)))
         print("New Weights!:")
         print(self.weights[:5], self.weights[-5:])
-        print(self.weights.shape, self.weights.min(), self.weights.max(), len(np.unique(self.weights)))
+        # print(self.weights.shape, self.weights.min(), self.weights.max(), len(np.unique(self.weights)))
 
         print("New poses:")
         print(self.poses[:5], self.poses[-5:])
-        print(self.poses.shape, self.poses.min(), self.poses.max(), len(np.unique(self.poses)))
+        # print(self.poses.shape, self.poses.min(), self.poses.max(), len(np.unique(self.poses)))
 
         print("RESAMPLING DONE!!")
 
@@ -196,12 +197,12 @@ class Particles(object):
         :return:
         """
         print("In get_best_path() of particle class")
-        print(len(self.best_traj))
+        # print(len(self.best_traj))
         # append the most recent pose and return
         ret = list(self.best_traj)
         best_part = self.get_best_particle()
         ret.append(best_part)
-        print(len(self.best_traj), len(ret))
+        # print(len(self.best_traj), len(ret))
         return ret
 
     def save_best_path(self, pth):

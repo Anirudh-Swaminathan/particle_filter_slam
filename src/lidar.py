@@ -113,7 +113,8 @@ class LiDAR(object):
         yaw_mat = np.array([[np.cos(yaw), -np.sin(yaw), 0.0], [np.sin(yaw), np.cos(yaw), 0.0], [0.0, 0.0, 1.0]])
         pitch_mat = np.array(
             [[np.cos(pitch), 0.0, np.sin(pitch)], [0.0, 1.0, 0.0], [-np.sin(pitch), 0.0, np.cos(pitch)]])
-        bRh = np.matmul(pitch_mat, yaw_mat)
+        # bRh = np.matmul(pitch_mat, yaw_mat)
+        bRh = np.matmul(yaw_mat, pitch_mat)
 
         # transform from head frame to body frame
         rot_scan_poses = np.matmul(bRh, head_coords)
