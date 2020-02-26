@@ -1,0 +1,11 @@
+Particles - 100
+Variance - [0.025, 0.025, 0.01]
+No YAW variations in map correlation
+No Particle Corrections in Map Correlation
+log(4)
+-20 to 20
+0.05 m/cell
+9*9 correlation
+log_odds - -50 to 50
+35% of Ntotal = Nthresh
+frame rate 20

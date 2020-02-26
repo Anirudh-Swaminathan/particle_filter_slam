@@ -1,9 +1,0 @@
-Particles - 25
-Variance - [0.005, 0.005, 0.01]
-No YAW variations in map correlation
-No Particle Corrections in Map Correlation
-log(4)
--40 to 40
-0.05 m/cell
-9*9 correlation
-No log odds clipping

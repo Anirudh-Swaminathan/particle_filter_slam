@@ -65,8 +65,8 @@ class OccGridMap(object):
         """
         # to avoid very high occupied logs as we progress through the time steps
         # also easy to convert to grayscale -> 255/2 = 127.5
-        # if self.grid[x, y] < 127.5:
-        self.grid[x, y] += self.delta_log
+        if self.grid[x, y] < 100.0:
+            self.grid[x, y] += self.delta_log
 
     def _update_free_logs(self, x, y):
         """
@@ -77,8 +77,8 @@ class OccGridMap(object):
         """
         # to avoid very low occupied logs as we progress through the time steps
         # also easy to convert to grayscale -> 255/2 = 127.5
-        # if self.grid[x, y] > -127.5:
-        self.grid[x, y] -= self.delta_log
+        if self.grid[x, y] > -100.0:
+            self.grid[x, y] -= self.delta_log
 
     def _bres(self, sx, sy, ex, ey):
         """

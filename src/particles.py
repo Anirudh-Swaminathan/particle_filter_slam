@@ -29,7 +29,7 @@ class Particles(object):
 
         # set the threshold for resampling
         # this is 20% of the initial number of particles
-        self.Nthresh = 0.20 * self.num_particles
+        self.Nthresh = 0.35 * self.num_particles
 
     def __len__(self):
         return self.num_particles
@@ -114,35 +114,40 @@ class Particles(object):
 
             # call mapCorrelation
             c = pu.mapCorrelation(bin_map, x_im, y_im, scan_world_coords, x_range, y_range)
-            if t % 10 == 0:
-                c_cpy = np.copy(c)
-                c_cpy = c_cpy / np.sum(c_cpy)
-                print("Correlations for particle: ", p, "is as follows")
-                print(c.shape)
-                print(c)
-                arm = np.argmax(c)
-                arm_i = np.unravel_index(arm, c.shape)
-                print(arm, arm_i, c[arm_i[0]][arm_i[1]])
-                print(p.shape)
-                print(p)
-                new_p = np.copy(p)
-                new_p[0] += ((arm_i[0] - 4) * 0.05)
-                new_p[1] += ((arm_i[1] - 4) * 0.05)
-                print("Updating x, y of pose would set it to:", new_p)
-                plt.imshow(c_cpy, cmap="gray")
-                plt.savefig("./outputs/ani_correctcorr/corr_parts.png")
-                plt.show()
+            # if t % 10 == 0:
+            #     c_cpy = np.copy(c)
+            #     c_cpy = c_cpy / np.sum(c_cpy)
+            #     print("Correlations for particle: ", p, "is as follows")
+            #     print(c.shape)
+            #     print(c)
+            #     arm = np.argmax(c)
+            #     arm_i = np.unravel_index(arm, c.shape)
+            #     print(arm, arm_i, c[arm_i[0]][arm_i[1]])
+            #     print(p.shape)
+            #     print(p)
+            #     new_p = np.copy(p)
+            #
+            #     # this is for the grid back to world frame
+            #     new_p[1] -= ((arm_i[0] - 4) * 0.05)
+            #     new_p[0] += ((arm_i[1] - 4) * 0.05)
+            #     print("Updating x, y of pose would set it to:", new_p)
+            #     plt.imshow(c_cpy, cmap="gray")
+            #     plt.savefig("./outputs/ani_correctcorr/corr_parts_b.png")
+            #     plt.show()
             # c = pu.mapCorrelation(mp.grid, x_im, y_im, scan_world_coords, x_range, y_range)
             mc = c.max()
             c_cpy = np.copy(c)
             arm = np.argmax(c_cpy)
             arm_i = np.unravel_index(arm, c_cpy.shape)
-            print("Maximum correlation is", mc, "for particle at index ", arm_i)
+            # print("Maximum correlation is", mc, "for particle at index ", arm_i)
 
-            # Update the pose of the particle
+            # Update the pose of this particle to it's max correlated value index
             new_p = np.copy(p)
-            new_p[0] += ((arm_i[0] - 4) * 0.05)
-            new_p[1] += ((arm_i[1] - 4) * 0.05)
+            print(new_p.shape, new_p[0].shape, new_p[1].shape)
+
+            # this is for the grid back to world frame
+            new_p[1] -= ((arm_i[0] - 4) * 0.05)
+            new_p[0] += ((arm_i[1] - 4) * 0.05)
             self.poses[i] = np.copy(new_p)
             max_correlations.append(np.copy(mc))
         max_cs = np.array(max_correlations)
@@ -226,7 +231,7 @@ class Particles(object):
         Return the trajectory of the best particle
         :return:
         """
-        print("In get_best_path() of particle class")
+        # print("In get_best_path() of particle class")
         # print(len(self.best_traj))
         # append the most recent pose and return
         ret = list(self.best_traj)

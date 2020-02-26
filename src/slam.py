@@ -73,17 +73,16 @@ def main():
     grid_map = OGM()
 
     # map save path
-    save_pth = "./outputs/slam/dataset0/test_009/occ_maps_"
+    save_pth = "./outputs/slam/dataset0/fast_results/test_003/occ_maps_"
 
     # initialize with 100 particles
-    # 5 particles to test out corellation
-    particles = Particles(n=5)
+    particles = Particles(n=100)
 
     step_size = 20
     # world poses -> the orientation of the body in the world frame at each time-step t
     world_poses = np.load("./outputs/dead_reckoning/world_poses_final.npy")
 
-    for t in range(0, len(li)):
+    for t in range(0, len(li), step_size):
         print("Time:", t + 1)
 
         ### MAPPING!!
@@ -122,11 +121,11 @@ def main():
 
 
         ### PREDICTION!
-        delta_p = li.get_delta_pose(t)
-        # if t == 0:
-        #     delta_p = li.get_delta_pose(t)
-        # else:
-        #     delta_p = world_poses[t] - world_poses[t - step_size]
+        # delta_p = li.get_delta_pose(t)
+        if t == 0:
+            delta_p = li.get_delta_pose(t)
+        else:
+            delta_p = world_poses[t] - world_poses[t - step_size]
         delta_p = delta_p.reshape((1, 3))
         particles.predict(delta_p)
         # print("\nThis is the move")
