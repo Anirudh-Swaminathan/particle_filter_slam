@@ -1,0 +1,4 @@
+log(4)
+-20 to 20
+0.05 m/cell
+No log odds clipping

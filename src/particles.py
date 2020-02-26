@@ -5,6 +5,7 @@ import numpy as np
 from scipy.special import expit
 from scipy.special import softmax
 import p2_utils as pu
+from matplotlib import pyplot as plt
 
 
 class Particles(object):
@@ -21,14 +22,14 @@ class Particles(object):
         self._init_particles()
 
         # standard deviations for x, y and yaw
-        self.predict_noise = np.array([0.005, 0.005, 0.0025])
+        self.predict_noise = np.array([0.025, 0.025, 0.01])
 
         # store best particles trajectory(list of numpy arrays)
         self.best_traj = []
 
         # set the threshold for resampling
-        # this is 15% of the initial number of particles
-        self.Nthresh = 0.10 * self.num_particles
+        # this is 20% of the initial number of particles
+        self.Nthresh = 0.20 * self.num_particles
 
     def __len__(self):
         return self.num_particles
@@ -78,7 +79,7 @@ class Particles(object):
         add_pose = dp + delta_pose.reshape((1, 3))
         self.poses += add_pose
 
-    def update(self, scan_body_frame, li, mp):
+    def update(self, scan_body_frame, li, mp, t):
         """
         UPDATE step for Particle Filter using LASER Scan Matching
         :param scan_body_frame: lidar scan in body frame
@@ -96,12 +97,14 @@ class Particles(object):
 
         # binarize map
         # bin_map = (expit(mp.grid) > 0.5).astype(np.int)
-        bin_map = (mp.grid > mp.delta_log).astype(np.int)
+        # bin_map = (mp.grid > mp.delta_log).astype(np.int)
+        bin_map = (mp.grid > 0).astype(np.int)
         # print(bin_map.shape, bin_map.min(), bin_map.max(), np.sum(bin_map))
         max_correlations = []
 
         # find the map correlation for each particle
-        for p in self.poses:
+        for i in range(self.num_particles):
+            p = self.poses[i]
             # convert scans to world frame for given particle
             scan_world_frame = li.body_to_world(scan_body_frame, p)
 
@@ -111,8 +114,36 @@ class Particles(object):
 
             # call mapCorrelation
             c = pu.mapCorrelation(bin_map, x_im, y_im, scan_world_coords, x_range, y_range)
+            if t % 10 == 0:
+                c_cpy = np.copy(c)
+                c_cpy = c_cpy / np.sum(c_cpy)
+                print("Correlations for particle: ", p, "is as follows")
+                print(c.shape)
+                print(c)
+                arm = np.argmax(c)
+                arm_i = np.unravel_index(arm, c.shape)
+                print(arm, arm_i, c[arm_i[0]][arm_i[1]])
+                print(p.shape)
+                print(p)
+                new_p = np.copy(p)
+                new_p[0] += ((arm_i[0] - 4) * 0.05)
+                new_p[1] += ((arm_i[1] - 4) * 0.05)
+                print("Updating x, y of pose would set it to:", new_p)
+                plt.imshow(c_cpy, cmap="gray")
+                plt.savefig("./outputs/ani_correctcorr/corr_parts.png")
+                plt.show()
             # c = pu.mapCorrelation(mp.grid, x_im, y_im, scan_world_coords, x_range, y_range)
             mc = c.max()
+            c_cpy = np.copy(c)
+            arm = np.argmax(c_cpy)
+            arm_i = np.unravel_index(arm, c_cpy.shape)
+            print("Maximum correlation is", mc, "for particle at index ", arm_i)
+
+            # Update the pose of the particle
+            new_p = np.copy(p)
+            new_p[0] += ((arm_i[0] - 4) * 0.05)
+            new_p[1] += ((arm_i[1] - 4) * 0.05)
+            self.poses[i] = np.copy(new_p)
             max_correlations.append(np.copy(mc))
         max_cs = np.array(max_correlations)
         # print("Current max correlations are :")
@@ -128,15 +159,15 @@ class Particles(object):
         # print(obs_model.shape, obs_model.min(), obs_model.max())
 
         assert(obs_model.shape == self.weights.shape)
-        print("Old weights:")
-        print(self.weights[:5], self.weights[-5:])
+        # print("Old weights:")
+        # print(self.weights[:5], self.weights[-5:])
         # print(self.weights.shape, self.weights.min(), self.weights.max(), len(np.unique(self.weights)))
         # particle filter update equation
         # numer = self.weights * obs_model
         numer = np.multiply(self.weights, obs_model)
         self.weights = numer / np.sum(numer)
-        print("New Weights!:")
-        print(self.weights[:5], self.weights[-5:])
+        # print("New Weights!:")
+        # print(self.weights[:5], self.weights[-5:])
         # print(self.weights.shape, self.weights.min(), self.weights.max(), len(np.unique(self.weights)))
 
     def resample(self):
@@ -147,12 +178,12 @@ class Particles(object):
         print("RESAMPLING particles!")
         # print(len(np.unique(self.weights)))
 
-        print("Old weights:")
-        print(self.weights[:5], self.weights[-5:])
+        # print("Old weights:")
+        # print(self.weights[:5], self.weights[-5:])
         # print(self.weights.shape, self.weights.min(), self.weights.max(), len(np.unique(self.weights)))
 
-        print("Old poses:")
-        print(self.poses[:5], self.poses[-5:])
+        # print("Old poses:")
+        # print(self.poses[:5], self.poses[-5:])
         # print(self.poses.shape, self.poses.min(), self.poses.max(), len(np.unique(self.poses)))
 
         # Use Sample Importance Resampling
@@ -161,14 +192,13 @@ class Particles(object):
         self.poses = np.copy(new_parts)
         self.weights = np.array([1/self.num_particles for p in range(self.num_particles)])
         # print(len(np.unique(self.weights)))
-        print("New Weights!:")
-        print(self.weights[:5], self.weights[-5:])
+        # print("New Weights!:")
+        # print(self.weights[:5], self.weights[-5:])
         # print(self.weights.shape, self.weights.min(), self.weights.max(), len(np.unique(self.weights)))
 
-        print("New poses:")
-        print(self.poses[:5], self.poses[-5:])
+        # print("New poses:")
+        # print(self.poses[:5], self.poses[-5:])
         # print(self.poses.shape, self.poses.min(), self.poses.max(), len(np.unique(self.poses)))
-
         print("RESAMPLING DONE!!")
 
     def get_best_particle(self):

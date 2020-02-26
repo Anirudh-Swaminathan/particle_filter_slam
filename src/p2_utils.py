@@ -25,13 +25,35 @@ def mapCorrelation(im, x_im, y_im, vp, xs, ys):
   nys = ys.size
   cpr = np.zeros((nxs, nys))
   for jy in range(0,nys):
-    y1 = vp[1,:] + ys[jy] # 1 x 1076
+    # y1 = vp[1,:] + ys[jy] # 1 x 1076
+    y1 = vp[0,:] + ys[jy] # 1 x 1076
     iy = np.int16(np.round((y1-ymin)/yresolution))
     for jx in range(0,nxs):
-      x1 = vp[0,:] + xs[jx] # 1 x 1076
+      # ANI VISUALIZATION CODE
+      c1 = np.copy(im)
+      c2 = np.zeros_like(c1)
+      c3 = np.ones_like(c1)
+      # x1 = vp[0,:] + xs[jx] # 1 x 1076
+      x1 = -1 * (vp[1,:] + xs[jx]) # 1 x 1076
       ix = np.int16(np.round((x1-xmin)/xresolution))
       valid = np.logical_and( np.logical_and((iy >=0), (iy < ny)), \
 			                        np.logical_and((ix >=0), (ix < nx)))
+      if jy == 4 and jx == 4:
+        # ANI CODE FOR VISUALIZATION
+        c2[ix[valid], iy[valid]] = 1
+        I1 = np.dstack((c1, c2))
+        I = np.dstack((I1, c3))
+        print(I.shape)
+        plt.imshow(c1, cmap="gray")
+        plt.savefig("./outputs/ani_correctcorr/my_map.png")
+        plt.show()
+        plt.imshow(c2, cmap="gray")
+        plt.savefig("./outputs/ani_correctcorr/scans.png")
+        plt.show()
+        plt.imshow(c3, cmap="gray")
+        plt.show()
+        plt.imshow(I)
+        plt.show()
       cpr[jx,jy] = np.sum(im[ix[valid],iy[valid]])
   return cpr
 

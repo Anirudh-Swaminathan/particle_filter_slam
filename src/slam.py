@@ -25,7 +25,7 @@ def plot_map(ps, mp, t, pth):
 
     # convert particle coordinates to grid coordinates
     parts = ps.poses
-    print(parts.shape)
+    # print(parts.shape)
     x_p = parts[:, 0]
     y_p = parts[:, 1]
 
@@ -34,17 +34,17 @@ def plot_map(ps, mp, t, pth):
     y_g = mp.origin[1] + np.round(y_p / mp.cell_size).astype(np.int)
     x_g = x_g.tolist()
     y_g = y_g.tolist()
-    print(len(x_g), len(y_g))
+    # print(len(x_g), len(y_g))
 
     # # plot the best particle's trajectory
     btraj = ps.get_best_path()
     # print(btraj)
-    print(len(btraj))
+    # print(len(btraj))
     bt = np.array(btraj)
     x_t = bt[:, 0]
     y_t = bt[:, 1]
-    print(x_t)
-    print(y_t)
+    # print(x_t)
+    # print(y_t)
     z_t = bt[:, 2]
 
     # convert to pyplot coordinates with 0,0 in the bottom left
@@ -52,7 +52,7 @@ def plot_map(ps, mp, t, pth):
     y_gt = mp.origin[1] + np.round(y_t / mp.cell_size).astype(np.int)
     x_gt = x_gt.tolist()
     y_gt = y_gt.tolist()
-    print(len(x_gt), len(y_gt))
+    # print(len(x_gt), len(y_gt))
 
     # plot the path
     plt.plot(x_gt, y_gt, 'b,', zorder=1)
@@ -73,16 +73,17 @@ def main():
     grid_map = OGM()
 
     # map save path
-    save_pth = "./outputs/slam/dataset0/test_008/occ_maps_"
+    save_pth = "./outputs/slam/dataset0/test_009/occ_maps_"
 
     # initialize with 100 particles
-    particles = Particles(n=100)
+    # 5 particles to test out corellation
+    particles = Particles(n=5)
 
     step_size = 20
     # world poses -> the orientation of the body in the world frame at each time-step t
     world_poses = np.load("./outputs/dead_reckoning/world_poses_final.npy")
 
-    for t in range(0, len(li), step_size):
+    for t in range(0, len(li)):
         print("Time:", t + 1)
 
         ### MAPPING!!
@@ -121,16 +122,16 @@ def main():
 
 
         ### PREDICTION!
-        # delta_p = li.get_delta_pose(t)
-        if t == 0:
-            delta_p = li.get_delta_pose(t)
-        else:
-            delta_p = world_poses[t] - world_poses[t - step_size]
+        delta_p = li.get_delta_pose(t)
+        # if t == 0:
+        #     delta_p = li.get_delta_pose(t)
+        # else:
+        #     delta_p = world_poses[t] - world_poses[t - step_size]
         delta_p = delta_p.reshape((1, 3))
         particles.predict(delta_p)
-        print("\nThis is the move")
-        print(delta_p)
-        print("")
+        # print("\nThis is the move")
+        # print(delta_p)
+        # print("")
         # particles.dead_reckon_move(delta_p)
 
 
@@ -158,7 +159,7 @@ def main():
         scan_body_frame = li.head_to_body(scan_head_frame, yaw, pitch)
 
         # update step on the particles
-        particles.update(scan_body_frame, li, grid_map)
+        particles.update(scan_body_frame, li, grid_map, t)
 
 
         ### Saving stuff

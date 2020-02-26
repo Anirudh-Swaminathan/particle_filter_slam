@@ -1,0 +1,6 @@
+Particles - 25
+Variance - [0.005, 0.005, 0.0001]
+log(4)
+-20 to 20
+0.05 m/cell
+No log odds clipping
