@@ -37,11 +37,11 @@ def animate(i):
     return path,
 
 
-ani = anim.FuncAnimation(fig, animate, init_func=init, frames=int(len(poses) / 2) + 1, interval=2, blit=True,
-                         repeat=False)
-plt.show()
+# ani = anim.FuncAnimation(fig, animate, init_func=init, frames=int(len(poses) / 2) + 1, interval=2, blit=True,
+#                          repeat=False)
+# plt.show()
 
 # save plot to file
-# ani = anim.FuncAnimation(fig, animate, frames=int(len(poses) / 2) + 1, interval=100, blit=False, repeat=False)
-# ani.save(data_base_path + "vid.mp4", extra_args=['-vcodec', 'libx264'])
+ani = anim.FuncAnimation(fig, animate, frames=int(len(poses) / 2) + 1, interval=2, blit=False, repeat=False)
+ani.save(data_base_path + "vid.mp4", extra_args=['-vcodec', 'libx264'])
 # ani.save("./outputs/dead_reckoning/path.mp4", writer=writer)
