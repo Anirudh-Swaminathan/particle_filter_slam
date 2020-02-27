@@ -75,14 +75,14 @@ def main():
     grid_map = OGM()
 
     # map save path
-    save_pth = "./outputs/slam/dataset0/fast_results/test_007/occ_maps_"
+    save_pth = "./outputs/slam/dataset0/fast_results/test_011/occ_maps_"
 
     # initialize with 100 particles
     particles = Particles(n=100)
 
-    step_size = 20
+    step_size = 100
     # world poses -> the orientation of the body in the world frame at each time-step t
-    world_poses = np.load("./outputs/dead_reckoning/world_poses_final.npy")
+    world_poses = np.load("./outputs/dead_reckoning/dataset0/world_poses_final.npy")
 
     for t in range(0, len(li), step_size):
         print("Time:", t + 1)

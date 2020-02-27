@@ -22,7 +22,7 @@ class Particles(object):
         self._init_particles()
 
         # standard deviations for x, y and yaw
-        self.predict_noise = np.array([0.025, 0.025, 0.01])
+        self.predict_noise = np.array([0.01, 0.01, 0.005])
 
         # store best particles trajectory(list of numpy arrays)
         self.best_traj = []

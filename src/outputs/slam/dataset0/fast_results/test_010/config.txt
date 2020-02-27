@@ -1,0 +1,11 @@
+Particles - 100
+Variance - [0.01, 0.01, 0.01]
+YAW correlation implemented
+X and Y NOT updated
+log(4)
+-20 to 20
+0.05 m/cell
+9*9 correlation
+log_odds - no clipping
+35% of Ntotal = Nthresh
+frame rate 100
