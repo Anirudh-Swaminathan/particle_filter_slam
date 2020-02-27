@@ -19,7 +19,8 @@ def body_to_world(del_x, del_y, world_theta):
 
 
 def main():
-    lidar_file = "data/lidar/train_lidar0"
+    print("Dead reckoning for dataset 4")
+    lidar_file = "data/lidar/train_lidar4"
     lidar_list = ld.get_lidar(lidar_file)
 
     # initial world frame pose
@@ -27,6 +28,8 @@ def main():
     cur_pose = [0, 0, 0]
     #poses.append(cur_pose)
     poses[0].extend(cur_pose)
+
+    print("Total of ", len(lidar_list), "readings!")
 
     for t in range(len(lidar_list)):
         dels = lidar_list[t]['delta_pose']
@@ -56,7 +59,7 @@ def main():
 
     # save the calculated poses to file
     world_poses = np.array(poses)
-    save_pth = "./outputs/dead_reckoning/world_poses_final"
+    save_pth = "./outputs/dead_reckoning/dataset4/world_poses_final"
     np.save(save_pth + ".npy", world_poses)
     with open(save_pth + ".txt", "w") as f:
         f.writelines("%s\n" % pose for pose in poses)

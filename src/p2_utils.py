@@ -25,17 +25,19 @@ def mapCorrelation(im, x_im, y_im, vp, xs, ys):
   nys = ys.size
   cpr = np.zeros((nxs, nys))
   for jy in range(0,nys):
-    # y1 = vp[1,:] + ys[jy] # 1 x 1076
-    y1 = vp[0,:] + ys[jy] # 1 x 1076
+    y1 = vp[1,:] + ys[jy] # 1 x 1076
+    # y1 = vp[0,:] + xs[jy] # 1 x 1076 - ANI
     iy = np.int16(np.round((y1-ymin)/yresolution))
+    # iy = np.int16(np.round((y1-xmin)/xresolution)) - ANI
     for jx in range(0,nxs):
       # # ANI VISUALIZATION CODE
       # c1 = np.copy(im)
       # c2 = np.zeros_like(c1)
       # c3 = np.ones_like(c1)
-      # x1 = vp[0,:] + xs[jx] # 1 x 1076
-      x1 = xs[jx] - vp[1,:] # 1 x 1076
+      x1 = vp[0,:] + xs[jx] # 1 x 1076
+      # x1 = vp[1,:] - ys[jx] # 1 x 1076 - ANI
       ix = np.int16(np.round((x1-xmin)/xresolution))
+      # ix = np.int16(np.round((ymax-x1)/yresolution)) - ANI
       valid = np.logical_and( np.logical_and((iy >=0), (iy < ny)), \
 			                        np.logical_and((ix >=0), (ix < nx)))
       # if jy == 4 and jx == 4:
@@ -45,15 +47,18 @@ def mapCorrelation(im, x_im, y_im, vp, xs, ys):
       #   I = np.dstack((I1, c3))
       #   print(I.shape)
       #   plt.imshow(c1, cmap="gray")
-      #   plt.savefig("./outputs/ani_correctcorr/my_map_b.png")
+      #   plt.savefig("./outputs/debug/my_map_c.png")
       #   plt.show()
       #   plt.imshow(c2, cmap="gray")
-      #   plt.savefig("./outputs/ani_correctcorr/scans_b.png")
+      #   plt.savefig("./outputs/debug/scans_c.png")
       #   plt.show()
       #   plt.imshow(c3, cmap="gray")
       #   plt.show()
       #   plt.imshow(I)
       #   plt.show()
+      # scan_map = np.zeros_like(im)
+      # scan_map[ix[valid], iy[valid]] = True
+      # cpr[jx,jy] = np.sum(np.logical_and(im, scan_map))
       cpr[jx,jy] = np.sum(im[ix[valid],iy[valid]])
   return cpr
 

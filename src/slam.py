@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 from occ_gmap import OccGridMap as OGM
 from lidar import LiDAR
 from particles import Particles
+from scipy.ndimage import rotate
 
 fig = plt.figure()
 
@@ -20,7 +21,8 @@ def plot_map(ps, mp, t, pth):
     # convert occupancy log odds to probabilities
     p = 1 - expit(mp.grid)
     I = np.dstack([p, p, p])
-    plt.imshow(I, extent=[0, mp.grid_size, 0, mp.grid_size])
+    rot_I = rotate(I, 90)
+    plt.imshow(rot_I, extent=[0, mp.grid_size, 0, mp.grid_size])
     plt.title("Occupancy Grid at time: " + str(t))
 
     # convert particle coordinates to grid coordinates
@@ -73,7 +75,7 @@ def main():
     grid_map = OGM()
 
     # map save path
-    save_pth = "./outputs/slam/dataset0/fast_results/test_003/occ_maps_"
+    save_pth = "./outputs/slam/dataset0/fast_results/test_007/occ_maps_"
 
     # initialize with 100 particles
     particles = Particles(n=100)

@@ -50,9 +50,11 @@ class OccGridMap(object):
         :return:
         """
         # Since grid starts with 0,0 top left, positive y in world is negative x from grid origin
-        xg = self.origin[0] - int(round(y / self.cell_size))
+        # xg = self.origin[0] - int(round(y / self.cell_size))
+        xg = self.origin[0] + int(round(x / self.cell_size))
         # Since grid starts with 0,0 top left, positive x in world is positive y from grid origin
-        yg = self.origin[1] + int(round(x / self.cell_size))
+        # yg = self.origin[1] + int(round(x / self.cell_size))
+        yg = self.origin[1] + int(round(y / self.cell_size))
         tg = theta
         return xg, yg, tg
 

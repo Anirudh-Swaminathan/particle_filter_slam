@@ -95,60 +95,60 @@ class Particles(object):
         x_range = np.arange(-0.2, 0.2 + 0.05, 0.05)
         y_range = np.arange(-0.2, 0.2 + 0.05, 0.05)
 
+        # start with yaw correlation
+        t_range = np.linspace(-0.1, 0.01, 9)
+
         # binarize map
         # bin_map = (expit(mp.grid) > 0.5).astype(np.int)
         # bin_map = (mp.grid > mp.delta_log).astype(np.int)
         bin_map = (mp.grid > 0).astype(np.int)
         # print(bin_map.shape, bin_map.min(), bin_map.max(), np.sum(bin_map))
         max_correlations = []
+        corrs = np.zeros((9, 9, 9))
 
         # find the map correlation for each particle
         for i in range(self.num_particles):
             p = self.poses[i]
-            # convert scans to world frame for given particle
-            scan_world_frame = li.body_to_world(scan_body_frame, p)
+            for j in range(t_range.size):
+                p_cp = np.copy(p)
+                p_cp[2] += t_range[j]
+                # convert scans to world frame for given particle
+                scan_world_frame = li.body_to_world(scan_body_frame, p_cp)
 
-            # Remove points hitting/close to floor
-            fin_scan_inds = np.where(scan_world_frame[2, :] > 0.1)
-            scan_world_coords = scan_world_frame[:3, fin_scan_inds[0]]
+                # Remove points hitting/close to floor
+                fin_scan_inds = np.where(scan_world_frame[2, :] > 0.1)
+                scan_world_coords = scan_world_frame[:3, fin_scan_inds[0]]
 
-            # call mapCorrelation
-            c = pu.mapCorrelation(bin_map, x_im, y_im, scan_world_coords, x_range, y_range)
-            # if t % 10 == 0:
-            #     c_cpy = np.copy(c)
-            #     c_cpy = c_cpy / np.sum(c_cpy)
-            #     print("Correlations for particle: ", p, "is as follows")
-            #     print(c.shape)
-            #     print(c)
-            #     arm = np.argmax(c)
-            #     arm_i = np.unravel_index(arm, c.shape)
-            #     print(arm, arm_i, c[arm_i[0]][arm_i[1]])
-            #     print(p.shape)
-            #     print(p)
-            #     new_p = np.copy(p)
-            #
-            #     # this is for the grid back to world frame
-            #     new_p[1] -= ((arm_i[0] - 4) * 0.05)
-            #     new_p[0] += ((arm_i[1] - 4) * 0.05)
-            #     print("Updating x, y of pose would set it to:", new_p)
-            #     plt.imshow(c_cpy, cmap="gray")
-            #     plt.savefig("./outputs/ani_correctcorr/corr_parts_b.png")
-            #     plt.show()
-            # c = pu.mapCorrelation(mp.grid, x_im, y_im, scan_world_coords, x_range, y_range)
-            mc = c.max()
-            c_cpy = np.copy(c)
-            arm = np.argmax(c_cpy)
-            arm_i = np.unravel_index(arm, c_cpy.shape)
-            # print("Maximum correlation is", mc, "for particle at index ", arm_i)
+                # call mapCorrelation
+                c = pu.mapCorrelation(bin_map, x_im, y_im, scan_world_coords, x_range, y_range)
+                corrs[j, :, :] = np.copy(c)
+                # if t % 10 == 0:
+                #     c_cpy = np.copy(c)
+                #     c_cpy = c_cpy / np.sum(c_cpy)
+                #     print("Correlations for particle: ", p, "is as follows")
+                #     print(c.shape)
+                #     print(c)
+                #     plt.imshow(c_cpy, cmap="gray")
+                #     plt.savefig("./outputs/debug/corr_parts_c.png")
+                #     plt.show()
+                # c = pu.mapCorrelation(mp.grid, x_im, y_im, scan_world_coords, x_range, y_range)
+            mc = corrs.max()
+            # arm = np.argmax(corrs)
+            # arm_i = np.unravel_index(arm, corrs.shape)
+            # print(arm, arm_i, corrs[arm_i[0]][arm_i[1]][arm_i[2]])
+            # # print(p.shape)
+            # # print(p)
+            # print("Maximum correlation is", mc, "for particle at index ", arm_i, "at position ", p)
 
-            # Update the pose of this particle to it's max correlated value index
-            new_p = np.copy(p)
-            print(new_p.shape, new_p[0].shape, new_p[1].shape)
-
-            # this is for the grid back to world frame
-            new_p[1] -= ((arm_i[0] - 4) * 0.05)
-            new_p[0] += ((arm_i[1] - 4) * 0.05)
-            self.poses[i] = np.copy(new_p)
+            # new_p = np.copy(p)
+            # # this is for the grid back to world frame
+            # # new_p[1] -= ((arm_i[0] - 4) * 0.05)
+            # # new_p[0] += ((arm_i[1] - 4) * 0.05)
+            # new_p[0] += ((arm_i[1] - 4) * 0.05)
+            # new_p[1] += ((arm_i[2] - 4) * 0.05)
+            # new_p[2] += t_range[arm_i[0] - 4]
+            # print("Updating x, y, and yaw of pose would set it to:", new_p)
+            # self.poses[i] = np.copy(new_p)
             max_correlations.append(np.copy(mc))
         max_cs = np.array(max_correlations)
         # print("Current max correlations are :")
@@ -158,12 +158,12 @@ class Particles(object):
         # observation model from laser correlation
         obs_model = softmax(max_cs - np.max(max_cs))
         # print(obs_model.shape)
-        assert(np.sum(abs(obs_model - softmax(max_cs))) <= 1e-6)
+        # assert(np.sum(abs(obs_model - softmax(max_cs))) <= 1e-6)
         # print("Observation model is:")
         # print(obs_model[:5], obs_model[-5:])
         # print(obs_model.shape, obs_model.min(), obs_model.max())
 
-        assert(obs_model.shape == self.weights.shape)
+        # assert(obs_model.shape == self.weights.shape)
         # print("Old weights:")
         # print(self.weights[:5], self.weights[-5:])
         # print(self.weights.shape, self.weights.min(), self.weights.max(), len(np.unique(self.weights)))
