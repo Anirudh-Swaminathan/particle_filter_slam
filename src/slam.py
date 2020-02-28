@@ -67,7 +67,7 @@ def plot_map(ps, mp, t, pth):
 
 
 def main():
-    print("Starting SLAM on dataset0")
+    print("Starting SLAM on dataset2")
     # load the LIDAR data
     li = LiDAR()
 
@@ -75,14 +75,14 @@ def main():
     grid_map = OGM()
 
     # map save path
-    save_pth = "./outputs/slam/dataset0/fast_results/test_011/occ_maps_"
+    save_pth = "./outputs/slam/dataset2/test_001/occ_maps_"
 
     # initialize with 100 particles
-    particles = Particles(n=100)
+    particles = Particles(n=250)
 
-    step_size = 100
+    step_size = 50
     # world poses -> the orientation of the body in the world frame at each time-step t
-    world_poses = np.load("./outputs/dead_reckoning/dataset0/world_poses_final.npy")
+    world_poses = np.load("./outputs/dead_reckoning/dataset2/world_poses_final.npy")
 
     for t in range(0, len(li), step_size):
         print("Time:", t + 1)

@@ -22,7 +22,7 @@ class Particles(object):
         self._init_particles()
 
         # standard deviations for x, y and yaw
-        self.predict_noise = np.array([0.01, 0.01, 0.005])
+        self.predict_noise = np.array([0.025, 0.025, 0.01])
 
         # store best particles trajectory(list of numpy arrays)
         self.best_traj = []
@@ -96,7 +96,7 @@ class Particles(object):
         y_range = np.arange(-0.2, 0.2 + 0.05, 0.05)
 
         # start with yaw correlation
-        t_range = np.linspace(-0.1, 0.01, 9)
+        t_range = np.linspace(-0.1, 0.1, 9)
 
         # binarize map
         # bin_map = (expit(mp.grid) > 0.5).astype(np.int)

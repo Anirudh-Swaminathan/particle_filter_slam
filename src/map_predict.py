@@ -9,6 +9,7 @@ from matplotlib import pyplot as plt
 from occ_gmap import OccGridMap as OGM
 from lidar import LiDAR
 from particles import Particles
+from scipy.ndimage import rotate
 
 fig = plt.figure()
 
@@ -21,12 +22,13 @@ def plot_map(ps, mp, t, pth):
     # convert occupancy log odds to probabilities
     p = 1 - expit(mp.grid)
     I = np.dstack([p, p, p])
-    plt.imshow(I, extent=[0, mp.grid_size, 0, mp.grid_size])
+    rot_I = rotate(I, 90)
+    plt.imshow(rot_I, extent=[0, mp.grid_size, 0, mp.grid_size])
     plt.title("Occupancy Grid at time: " + str(t))
 
     # convert particle coordinates to grid coordinates
     parts = ps.poses
-    print(parts.shape)
+    # print(parts.shape)
     x_p = parts[:, 0]
     y_p = parts[:, 1]
     # x_g, y_g, _ = mp._v_world_to_grid(x_p, y_p, 0)
@@ -34,24 +36,24 @@ def plot_map(ps, mp, t, pth):
     y_g = mp.origin[1] + np.round(y_p / mp.cell_size).astype(np.int)
     x_g = x_g.tolist()
     y_g = y_g.tolist()
-    print(len(x_g), len(y_g))
+    # print(len(x_g), len(y_g))
 
     # # plot the best particle's trajectory
     btraj = ps.get_best_path()
-    print(btraj)
-    print(len(btraj))
+    # print(btraj)
+    # print(len(btraj))
     bt = np.array(btraj)
     x_t = bt[:, 0]
     y_t = bt[:, 1]
-    print(x_t)
-    print(y_t)
+    # print(x_t)
+    # print(y_t)
     z_t = bt[:, 2]
     # x_gt, y_gt, _ = mp._v_world_to_grid(x_t, y_t, z_t)
     x_gt = mp.origin[0] + np.round(x_t / mp.cell_size).astype(np.int)
     y_gt = mp.origin[1] + np.round(y_t / mp.cell_size).astype(np.int)
     x_gt = x_gt.tolist()
     y_gt = y_gt.tolist()
-    print(len(x_gt), len(y_gt))
+    # print(len(x_gt), len(y_gt))
 
     # plot the path
     plt.plot(x_gt, y_gt, 'b,', zorder=1)
@@ -78,12 +80,15 @@ def main():
     grid_map = OGM()
 
     # map save path
-    save_pth = "./outputs/map_predict/dataset0/try_004/occ_maps_"
+    save_pth = "./outputs/map_predict/dataset4/try_001/occ_maps_"
 
     # initialize 25 particles
     particles = Particles(n=25)
 
-    for t in range(len(li)):
+    step_size = 50
+    world_poses = np.load("./outputs/dead_reckoning/dataset4/world_poses_final.npy")
+
+    for t in range(0, len(li), step_size):
         print("Time:", t + 1)
 
         ### MAPPING!!
@@ -118,7 +123,11 @@ def main():
         grid_map.update_map(scan_world_coords, body_pose)
 
         ### PREDICTION!
-        delta_p = li.get_delta_pose(t)
+        # delta_p = li.get_delta_pose(t)
+        if t == 0:
+            delta_p = li.get_delta_pose(t)
+        else:
+            delta_p = world_poses[t] - world_poses[t - step_size]
         delta_p = delta_p.reshape((1, 3))
         particles.predict(delta_p)
 

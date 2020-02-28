@@ -3,6 +3,7 @@ import numpy as np
 import p2_utils as pu
 import matplotlib.pyplot as plt
 from scipy.special import expit
+from scipy.ndimage import rotate
 
 
 class OccGridMap(object):
@@ -18,7 +19,7 @@ class OccGridMap(object):
         self.cell_size = 0.05
 
         # the total side length the grid should span in meters
-        self.grid_dims = 40
+        self.grid_dims = 80
 
         # grid size is now calculated
         self.grid_size = int(self.grid_dims / self.cell_size)
@@ -34,10 +35,10 @@ class OccGridMap(object):
         self.delta_log = np.log(4)
 
         # min and max required for map correlation (in meters)
-        self.xmin = -20
-        self.ymin = -20
-        self.xmax = 20
-        self.ymax = 20
+        self.xmin = -40
+        self.ymin = -40
+        self.xmax = 40
+        self.ymax = 40
 
         # vectorized functions to handle numpy inputs instead of scalar inputs
         self._v_bres = np.vectorize(self._bres)
@@ -67,8 +68,8 @@ class OccGridMap(object):
         """
         # to avoid very high occupied logs as we progress through the time steps
         # also easy to convert to grayscale -> 255/2 = 127.5
-        if self.grid[x, y] < 50.0:
-            self.grid[x, y] += self.delta_log
+        # if self.grid[x, y] < 50.0:
+        self.grid[x, y] += self.delta_log
 
     def _update_free_logs(self, x, y):
         """
@@ -79,8 +80,8 @@ class OccGridMap(object):
         """
         # to avoid very low occupied logs as we progress through the time steps
         # also easy to convert to grayscale -> 255/2 = 127.5
-        if self.grid[x, y] > -200.0:
-            self.grid[x, y] -= self.delta_log
+        # if self.grid[x, y] > -200.0:
+        self.grid[x, y] -= self.delta_log
 
     def _bres(self, sx, sy, ex, ey):
         """
@@ -174,6 +175,9 @@ class OccGridMap(object):
         plotter = 1 - expit(self.grid)
         plt.imshow(plotter, cmap="gray")
         plt.savefig(pth)
+        plt.show()
+        rot_p = rotate(plotter, 90)
+        plt.imshow(rot_p, cmap="gray")
         plt.show()
 
     def save_grid(self, pth):

@@ -11,8 +11,8 @@ class LiDAR(object):
         """
         Constuctor for the LiDAR class
         """
-        self.lidar_path = "data/lidar/train_lidar0"
-        self.joint_path = "data/joint/train_joint0"
+        self.lidar_path = "data/lidar/train_lidar2"
+        self.joint_path = "data/joint/train_joint2"
 
         # load the data and keep it for now
         self.lidar_list = ld.get_lidar(self.lidar_path)
